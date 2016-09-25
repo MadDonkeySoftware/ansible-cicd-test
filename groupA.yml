@@ -1,0 +1,6 @@
+# ansible-playbook -K -u {{user}} -k /path/to/dev-setup.yml --extra-vars="hosts=host_group"
+# - hosts: {{hosts}}
+---
+- hosts: groupA
+  roles:
+    - install-mongo

@@ -1,0 +1,33 @@
+---
+  - name: Install prerequs
+    apt: name={{item}} state=installed update_cache=true
+    with_items:
+      - python
+    become: true
+
+  - name: Check for MongoDB install.
+    command: dpkg-query -W mongodb-org
+    register: mongodb_check_deb
+    failed_when: mongodb_check_deb.rc > 1
+    changed_when: mongodb_check_deb.rc == 1
+
+  - name: Import MongoDB public key
+    command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+    when: mongodb_check_deb.rc == 1
+    become: true
+
+  - name: Create MongoDB list file
+    shell: echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.2.list creates=/etc/apt/sources.list.d/mongodb-org-3.2.list
+    when: mongodb_check_deb.rc == 1
+    become: true
+
+  - name: Install packages
+    apt: name={{item}} state=installed update_cache=true
+    with_items:
+      - mongodb-org=3.2.9
+      - mongodb-org-server=3.2.9
+      - mongodb-org-shell=3.2.9
+      - mongodb-org-mongos=3.2.9
+      - mongodb-org-tools=3.2.9
+    when: mongodb_check_deb.rc == 1
+    become: true
